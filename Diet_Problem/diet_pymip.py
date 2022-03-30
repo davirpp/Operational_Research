@@ -3,73 +3,73 @@ from mip import *
 
 
 def readInstance(filePath):
-    f = open(filePath, "r")  # Abertura de arquivo usando sys.argv[1] no objeto f
+    f = open(filePath, "r")  # Opening the file with sys.argv[1] on the object f
 
-    l = f.readline()  # Pega primeira linha
-    nb_foods, nb_nutrients = int(l.split()[0]), int(l.split()[1])  # Recebe 2 variáveis e as armazena
+    l = f.readline()  # Takes first row
+    nb_foods, nb_nutrients = int(l.split()[0]), int(l.split()[1])  # Get 2 variables
 
-    l = f.readline()  # Pega a segunda linha
-    costs = [float(c) for c in l.split()]  # Cria uma lista iterando o conteúdo da linha
+    l = f.readline()  # Takes second row
+    costs = [float(c) for c in l.split()]  # Creates a list iterating over the content of the row
 
-    l = f.readline()  # Pega a terceira linha
-    min_levels = [float(m) for m in l.split()]  # Cria uma lista iterando o conteúdo da linha
+    l = f.readline()  # Takes third row
+    min_levels = [float(m) for m in l.split()]  # Creates a list iterating over the content of the row
 
-    food_nutr_levels = []  # Cria a lista vazia
-    for i in range(nb_foods):  # Utiliza até o range(0, nb_foods - 1), nesse caso(instance2.txt) nb_foods=4
-        l = f.readline()  # Pega as linhas faltantes por meio da iteração do for
-        levels = [float(level) for level in l.split()]  # Cria uma lista iterando o conteúdo da linha
-        food_nutr_levels.append(levels)  # Coloca a lista que acabou de ser 'criada' dentro da lista vazia
-        # Assim, food_nutr_levels é uma lista de listas
-    f.close()  # Encerra a leitura do objeto f
+    food_nutr_levels = []  # Creates an empty list
+    for i in range(nb_foods):  # Range(0, nb_foods - 1), on main case(instance.txt) nb_foods=4
+        l = f.readline()  # Takes the missing rows
+        levels = [float(level) for level in l.split()]  # Creates a list iterating over the content of the row
+        food_nutr_levels.append(levels)  # Put the list inside of the empty list
+        # So food_nutr_levels is a list of lists
+    f.close()  # Finishes the reading of object f
 
-    return nb_foods, nb_nutrients, costs, min_levels, food_nutr_levels  # Retorna os valores determinados
+    return nb_foods, nb_nutrients, costs, min_levels, food_nutr_levels  # Returns the read data
 
 
 def createModel(nb_foods, nb_nutrients, costs, min_levels, food_nutr_levels):
-    model = Model(sense=MINIMIZE, solver_name=CBC)  # Cria o objeto model no construtor padrão, com o parâmetro
-    # sense=MINIMIZE para minimizar o modelo e determina o solver CBC
+    model = Model(sense=MINIMIZE, solver_name=CBC)  # Creates the Model object in the default constructor, with the parameters
+    # sense=MINIMIZE to minimize the model and determinate the solver CBC
 
     x = [model.add_var(var_type="CONTINUOUS", lb=0.0, name='x' + str(i))
-         for i in range(nb_foods)]  # Cria uma lista de objetos do tipo variável
-    # Adiciona as variáveis ao modelo, sempre do tipo "CONTINUOUS", determina o limite inferior(lb=0.0)
-    # Nomeia as variáveis com x(iteração sobre os números(servindo apenas de label) contidos na lista nb_foods)
+         for i in range(nb_foods)]  # Creates a list of objects from Var type
+    # Add variables to the model, in Linear Programming, the type will always be "CONTINUOUS", and determinates the lower bound(lb) = 0
+    # Name tha variables with x(iterating over the numbers(just like a label) inside the list nb_foods)
 
-    model.objective = xsum(costs[i] * x[i] for i in range(nb_foods))  # Cria a função objetivo do modelo
-    # Utiliza a função xsum, propria do MIP (Somatório)
-    # Na função ele mostra que a função objetivo faz:
-    # Faça uma combinação linear dos custos multiplicados pelas variáveis respectivas
-    # para saber a quantidade de cada nutriente
+    model.objective = xsum(costs[i] * x[i] for i in range(nb_foods))  # Creates the objective function of the model
+    # Uses the 'xsum' function, from MIP
+    # On that function it shows that the objective function does:
+    # Make a linear combination of the costs multiplied by the respective variables
+    # to know the quantity of each nutrient
 
-    for j in range(nb_nutrients):  # for para iterar sobre o nb_nutrients(em instance2.txt =2) e criar cada restrição
+    for j in range(nb_nutrients):  # for to iterate over nb_nutrients(in instance.txt =2) and create each constraint
         model += xsum(food_nutr_levels[i][j] * x[i]
                       for i in range(nb_foods)) >= min_levels[j], "NUTRI_" + str(j)
-        # O '+=' adicionando ao model é uma sintaxe da biblioteca para adicionar restrições,
-        # que como tem no problema é Vitamina A ≥ 3,000 UI e Vitamina C ≥ 50 mg
-        # Ele adiciona como restrições, uma combinação linear primeiro iterando o j para pegar o nutriente1
-        # E faz uma combinação linear multiplicando pelas variáveis respectivas em x sendo o RHS a parte do
-        # ">= min_levels[j]", e após isso, nomeia cada restrição
+        # The '+=' adding to the model is a library syntax to add constraints,
+        # that like is on the problem, Vitamin A ≥ 3000 UI and Vitamin C ≥ 50 mg
+        # It adds like the constraints, a linear combination iterating the j to catch the nutrient 1
+        # And does a linear combination multiplying its respective variables in x, being the RHS part of
+        # ">= min_levels[j]", and after that, names every constraints
 
-    return model  # Retorna o modelo ja pronto
+    return model  # Returns the finished model
 
 
-def main():  # Define a main exclusiva para isso
+def main():  # Defines the main function
     nb_foods, nb_nutrients, costs, min_levels, food_nutr_levels = readInstance(
-        sys.argv[1])  # Preenche cada variável lendo o arquivo usando a função criada readInstance
+        sys.argv[1])  # Fills every variable reading the file using the created function readInstance
 
     model = createModel(nb_foods, nb_nutrients, costs,
                         min_levels, food_nutr_levels)
-    # 'Cria'/Inicializa o modelo na variável model
+    # 'Creates'/Initializes the model
 
-    status = model.optimize()  # Retorna o status da otimização
+    status = model.optimize()  # Returns the optimization status
 
     print("Status = ", status)
     print("Solution value  = ", model.objective_value)
 
-    model.write("model_diet.lp")  # Cria um arquivo .lp com a Programação Linear do problema
+    model.write("model_diet.lp")  # Create a .lp file with the Linear Programming of the problem
 
     print("Solution:")
-    for v in model.vars:  # Iteração sobre o model.vars que são as variáveis criadas na linha 32
-        if v.x > 0.00001:  # Caso o valor da variável (v.x) seja maior que 0, significa que a variável foi utilizada
+    for v in model.vars:  # Iterating over model.vars that are the variables created on row 32
+        if v.x > 0.00001:  # If the value of the variable (v.x) is bigger than 0, it means that the variable was used
             print(v.name, " = ", v.x)
 
 
