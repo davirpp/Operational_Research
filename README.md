@@ -7,3 +7,4 @@ The first contact made with OR was with Linear Programming with the
  * Diet Problem, you can see the problem and solution [here](https://github.com/davirpp/Operational_Research/tree/main/Diet_Problem)
  * Transportation Problem, you can see the problem and solution [here](https://github.com/davirpp/Operational_Research/tree/main/Transportation_problem)
  * Cultivation Problem, you can see the problem and solution [here](https://github.com/davirpp/Operational_Research/tree/main/Cultivation_problem)
+ * Network Flow, you can see the problem and solution [here](https://github.com/davirpp/Operational_Research/tree/main/Network_Flow)
